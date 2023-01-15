@@ -13,6 +13,25 @@ from selenium.common.exceptions import NoSuchElementException
 
 import lib
 
+
+import os
+
+# System call
+os.system("")
+
+# Class of different styles
+class style():
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
+    UNDERLINE = '\033[4m'
+    RESET = '\033[0m'
+
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
 # url = "file:///C:/Users/thayt/Desktop/kqht01.html"
@@ -20,38 +39,39 @@ url = "https://lms.rdi.edu.vn/"
 
 driver.get(url)
 
-username = "194122671"
+# username = "194122671"
+username = "194122679"
 password = "@Mydung0209"
 
-# username = "194122679"
-# password = "194122679#@"
+
 
 driver.find_element(By.XPATH, '//*[@id="username"]').send_keys(username)
 driver.find_element(By.XPATH, '//*[@id="password"]').send_keys(password)
 driver.find_element(By.XPATH, '//*[@class="signup-form"]/div[3]/button').click()
 
 
-
 def Click(ma_mon, so_lan, lan_lam_thu):
     lan_lam_thu += 1
     database = lib.getDataMon(ma_mon)
-    data_mon = database[ma_mon]        
+    data_mon = database[ma_mon] 
 
-    time.sleep(random.randint(5,30))
+    so_cau = len(data_mon)     
 
     try:
         driver.find_element(By.XPATH, '/html/body/div[2]/div[3]/div/div/section/div[1]/div/div/div[3]/div/form/button').click()
     except NoSuchElementException:
         driver.find_element(By.XPATH, '/html/body/div[2]/div[3]/div/div/section/div[1]/div/div/div[2]/div/form/button').click()
     
-
+    # Bai tap ---------------------------------------------------------------
     
-    time.sleep(random.randint(5,30))
+    time.sleep(2)
     
     whandle = driver.window_handles[1]
     driver.switch_to.window(whandle)
 
     so_cauhoi = driver.find_elements(By.XPATH, '//*[@class="qtext"]')
+
+    so_cauchuacodapan=0
 
     for r in range (1,len(so_cauhoi)+1):
         
@@ -64,18 +84,26 @@ def Click(ma_mon, so_lan, lan_lam_thu):
         dapandung_arr = lib.getDapanDung(data_mon, cauhoi )
 
         so_dapan = driver.find_elements(By.XPATH, '//form/div/div['+str(r)+']/div[2]/div[1]/div[2]/div[2]/div')
-   
+
+        cauhoi_datontai = 0
 
         for e in range (1,len(so_dapan)+1) :
             dapan = driver.find_element(By.XPATH, '//form/div/div['+str(r)+']/div[2]/div[1]/div[2]/div[2]/div['+str(e)+']/div/div').text
             
-            if(dapan in dapandung_arr):
-                print(cauhoi)
+            if(dapan in dapandung_arr):   
+                cauhoi_datontai +=1             
                 driver.find_element(By.XPATH, '//form/div/div['+str(r)+']/div[2]/div/div[2]/div[2]/div['+str(e)+']/input').click()
 
+        if(cauhoi_datontai == 0):
+            so_cauchuacodapan +=1
+            print(style.RED + so_cauchuacodapan +' - '+cauhoi + style.RESET)
         
 
-        time.sleep(random.randint(5,30))
+        time.sleep(random.randint(5,15))
+    
+    # end bai tap ---------------------------------------------------------------
+
+    print('----------------------------------------------------------------')
 
     driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[2]/div/section[1]/div/form/div/div[6]/input').click()
 
@@ -87,13 +115,12 @@ def Click(ma_mon, so_lan, lan_lam_thu):
 
     el_ketthuc = driver.find_elements(By.XPATH, "//*[@value='Nộp bài và kết thúc']")
 
-
-
     for r in range (0,len(el_ketthuc)):
         el_ketthuc[r].click()
 
 
 
+# Luu ----------------------------------------------------------------
 
     for r in range (1,len(so_cauhoi)+1):
         
@@ -109,6 +136,9 @@ def Click(ma_mon, so_lan, lan_lam_thu):
 
             so_dapan = driver.find_elements(By.XPATH, '//form/div/div['+str(r)+']/div[2]/div[1]/div[2]/div[2]/div')
 
+            so_cau +=1
+            print(so_cau + ' - ' + cauhoi)
+
             dapan = []
 
             for e in range (1,len(so_dapan)+1) :
@@ -123,8 +153,7 @@ def Click(ma_mon, so_lan, lan_lam_thu):
             }
         
             data_mon.append(data)
-        else:
-            print("Da ton tai: " + cauhoi)
+        
 
 
     with open('data.json', 'w',encoding='utf8') as outfile:
@@ -132,24 +161,22 @@ def Click(ma_mon, so_lan, lan_lam_thu):
 
     driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[2]/div/section[1]/div/div/input').click()
 
+# End Luu ----------------------------------------------------------------
 
     whandle = driver.window_handles[0]
     driver.switch_to.window(whandle)
 
-    # print(str(so_lan) +' - ' + str(lan_lam_thu))
+    print(' ')
+    print(style.GREEN + 'So cau : ' + str(so_cau) + ' - Da lam ' + str(lan_lam_thu)+' lan' + style.RESET) 
+    print(' ')
 
-    if(int(so_lan)< int(lan_lam_thu)):
-        input('Da lam ' + str(lan_lam_thu))
+    if(int(so_lan)<= int(lan_lam_thu)):
+        print('Da lam ' + str(lan_lam_thu))
        
-        print(' ')
-        so_lan = input('Ban muon lam bao nhieu lan?   ')
-        print(' ')
-
-        if(so_lan==''):
-            so_lan =0
+        so_lan = lib.solanLambai()
         ma_mon = driver.find_element(By.XPATH, '//header/div/div/div/div[2]/div[1]/nav/ol/li[3]/a').text
 
-        lan_lam_thu = 1
+        lan_lam_thu = 0
 
         Click(ma_mon, so_lan, lan_lam_thu)
 
@@ -157,15 +184,12 @@ def Click(ma_mon, so_lan, lan_lam_thu):
 
     
     
-print(' ')
-so_lan = input('Ban muon lam bao nhieu lan?    ')   
 
-print(' ')
-if(so_lan==''):
-    so_lan =0
+
+so_lan = lib.solanLambai()
 ma_mon = driver.find_element(By.XPATH, '//header/div/div/div/div[2]/div[1]/nav/ol/li[3]/a').text
 
-lan_lam_thu = 1
+lan_lam_thu = 0
 
 Click(ma_mon, so_lan, lan_lam_thu)
 
